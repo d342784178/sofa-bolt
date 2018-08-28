@@ -79,6 +79,7 @@ public class ProtocolCodeBasedDecoder extends AbstractBatchDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         in.markReaderIndex();
+        //读取protocolCode
         ProtocolCode protocolCode = decodeProtocolCode(in);
         if (null != protocolCode) {
             byte protocolVersion = decodeProtocolVersion(in);
@@ -88,9 +89,12 @@ public class ProtocolCodeBasedDecoder extends AbstractBatchDecoder {
                     ctx.channel().attr(Connection.VERSION).set(protocolVersion);
                 }
             }
+            //根据protocolCode 获取注册的Protocol
             Protocol protocol = ProtocolManager.getProtocol(protocolCode);
             if (null != protocol) {
+                //获取到protocol 重置readerIndex
                 in.resetReaderIndex();
+                //使用protocol进行解码
                 protocol.getDecoder().decode(ctx, in, out);
             } else {
                 throw new CodecException("Unknown protocol code: [" + protocolCode

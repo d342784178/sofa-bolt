@@ -23,7 +23,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 /**
  * Decode command.
- * 
+ * 命令解码
+ *
  * @author jiangping
  * @version $Id: CommandDecoder.java, v 0.1 Mar 10, 2016 11:32:46 AM jiangping Exp $
  */

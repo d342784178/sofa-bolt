@@ -26,6 +26,7 @@ import com.alipay.remoting.exception.RemotingException;
 import com.alipay.remoting.log.BoltLoggerFactory;
 
 /**
+ * 开启子线程进行重连
  * Reconnect manager.
  * 
  * @author yunliang.shi

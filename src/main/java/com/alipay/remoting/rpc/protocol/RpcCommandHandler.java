@@ -63,13 +63,13 @@ public class RpcCommandHandler implements CommandHandler {
     public RpcCommandHandler(CommandFactory commandFactory) {
         this.commandFactory = commandFactory;
         this.processorManager = new ProcessorManager();
-        //process request
+        //处理request
         this.processorManager.registerProcessor(RpcCommandCode.RPC_REQUEST,
             new RpcRequestProcessor(this.commandFactory));
-        //process response
+        //处理response
         this.processorManager.registerProcessor(RpcCommandCode.RPC_RESPONSE,
             new RpcResponseProcessor());
-
+        //处理心跳
         this.processorManager.registerProcessor(CommonCommandCode.HEARTBEAT,
             new RpcHeartBeatProcessor());
 

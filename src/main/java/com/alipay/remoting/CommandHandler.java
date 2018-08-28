@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Command handler.
+ * 处理命令
  * 
  * @author jiangping
  * @version $Id: CommandHandler.java, v 0.1 2015-12-14 PM4:03:55 tao Exp $

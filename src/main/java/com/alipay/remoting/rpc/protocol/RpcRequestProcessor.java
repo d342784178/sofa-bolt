@@ -70,14 +70,18 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
     }
 
     /**
+     * 灵活的反序列化时机控制
      * @see com.alipay.remoting.AbstractRemotingProcessor#process(com.alipay.remoting.RemotingContext, com.alipay.remoting.RemotingCommand, java.util.concurrent.ExecutorService)
      */
     @Override
     public void process(RemotingContext ctx, RpcRequestCommand cmd, ExecutorService defaultExecutor)
                                                                                                     throws Exception {
+        // 反序列化
         if (!deserializeRequestCommand(ctx, cmd, RpcDeserializeLevel.DESERIALIZE_CLAZZ)) {
             return;
         }
+
+        // 根据业务请求类名 得到UserProcessor
         UserProcessor userProcessor = ctx.getUserProcessor(cmd.getRequestClass());
         if (userProcessor == null) {
             String errMsg = "No user processor found for request: " + cmd.getRequestClass();
@@ -87,9 +91,11 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
             return;// must end process
         }
 
+        // 设置响应超时
         // set timeout check state from user's processor
         ctx.setTimeoutDiscard(userProcessor.timeoutDiscard());
 
+        // 在io线程执行
         // to check whether to process in io thread
         if (userProcessor.processInIOThread()) {
             if (!deserializeRequestCommand(ctx, cmd, RpcDeserializeLevel.DESERIALIZE_ALL)) {
@@ -99,7 +105,7 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
             new ProcessTask(ctx, cmd).run();
             return;// end
         }
-
+        // 在业务线程池执行
         Executor executor = null;
         // to check whether get executor using executor selector
         if (null == userProcessor.getExecutorSelector()) {
@@ -110,7 +116,7 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
             if (!deserializeRequestCommand(ctx, cmd, RpcDeserializeLevel.DESERIALIZE_HEADER)) {
                 return;
             }
-            //try get executor with strategy
+            //使用线程池选择器 选择线程池 有点类似主从reactor
             executor = userProcessor.getExecutorSelector().select(cmd.getRequestClass(),
                 cmd.getRequestHeader());
         }
@@ -132,7 +138,9 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
     public void doProcess(final RemotingContext ctx, RpcRequestCommand cmd) throws Exception {
         long currenTimestamp = System.currentTimeMillis();
 
+        // 准备上下文
         preProcessRemotingContext(ctx, cmd, currenTimestamp);
+        // 执行超时
         if (ctx.isTimeoutDiscard() && ctx.isRequestTimeout()) {
             timeoutLog(cmd, currenTimestamp, ctx);// do some log
             return;// then, discard this request
@@ -230,10 +238,11 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
             }
         } else {
             try {
+                // 执行请求
                 Object responseObject = processor
                     .handleRequest(processor.preHandleRequest(ctx, cmd.getRequestObject()),
                         cmd.getRequestObject());
-
+                // 返回请求结果
                 sendResponseIfNecessary(ctx, type,
                     this.getCommandFactory().createResponse(responseObject, cmd));
             } catch (RejectedExecutionException e) {
@@ -252,10 +261,10 @@ public class RpcRequestProcessor extends AbstractRemotingProcessor<RpcRequestCom
 
     /**
      * deserialize request command
-     * 
+     * 反序列化cmd
      * @param ctx
      * @param cmd
-     * @param level
+     * @param level 序列化级别
      * @return true if deserialize success; false if exception catched
      */
     private boolean deserializeRequestCommand(RemotingContext ctx, RpcRequestCommand cmd, int level) {

@@ -86,9 +86,9 @@ public class RpcCommandDecoderV2 implements CommandDecoder {
                     in.markReaderIndex();
                     in.readByte(); //protocol code
                     byte version = in.readByte(); //protocol version
-                    byte type = in.readByte(); //type
+                    byte type = in.readByte(); //type: request response oneway
                     if (type == RpcCommandType.REQUEST || type == RpcCommandType.REQUEST_ONEWAY) {
-                        //decode request
+                        //协议头完整 24-1(protocolCode)-1(version) -1(type)
                         if (in.readableBytes() >= RpcProtocolV2.getRequestHeaderLength() - 3) {
                             short cmdCode = in.readShort();
                             byte ver2 = in.readByte();
@@ -112,7 +112,7 @@ public class RpcCommandDecoderV2 implements CommandDecoder {
                                 lengthAtLeastForV2 += 4;// crc int
                             }
 
-                            // continue read
+                            // 协议体完整
                             if ((version == RpcProtocolV2.PROTOCOL_VERSION_1 && in.readableBytes() >= lengthAtLeastForV1)
                                 || (version == RpcProtocolV2.PROTOCOL_VERSION_2 && in
                                     .readableBytes() >= lengthAtLeastForV2)) {
@@ -131,14 +131,15 @@ public class RpcCommandDecoderV2 implements CommandDecoder {
                                 if (version == RpcProtocolV2.PROTOCOL_VERSION_2 && crcSwitchOn) {
                                     checkCRC(in, startIndex);
                                 }
-                            } else {// not enough data
+                            } else {// 协议体不完整 重置readerIndex
                                 in.resetReaderIndex();
                                 return;
                             }
+                            // payload or heartBeat
                             RequestCommand command;
                             if (cmdCode == CommandCode.HEARTBEAT_VALUE) {
                                 command = new HeartbeatCommand();
-                            } else {
+                            } else {//业务请求
                                 command = createRequestCommand(cmdCode);
                             }
                             command.setType(type);

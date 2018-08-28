@@ -227,8 +227,10 @@ public class RpcServer extends RemotingServer {
 
             protected void initChannel(SocketChannel channel) throws Exception {
                 ChannelPipeline pipeline = channel.pipeline();
+                //解码器 得到protocol
                 pipeline.addLast("decoder", new RpcProtocolDecoder(
                     RpcProtocolManager.DEFAULT_PROTOCOL_CODE_LENGTH));
+                //编码器
                 pipeline.addLast(
                     "encoder",
                     new ProtocolCodeBasedEncoder(ProtocolCode
@@ -238,7 +240,9 @@ public class RpcServer extends RemotingServer {
                         TimeUnit.MILLISECONDS));
                     pipeline.addLast("serverIdleHandler", serverIdleHandler);
                 }
+                //事件回调/日志
                 pipeline.addLast("connectionEventHandler", connectionEventHandler);
+                //命令处理
                 pipeline.addLast("handler", rpcHandler);
                 createConnection(channel);
             }

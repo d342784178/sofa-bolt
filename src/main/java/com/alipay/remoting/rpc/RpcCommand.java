@@ -42,6 +42,7 @@ public abstract class RpcCommand implements RemotingCommand {
 
     /**
      * Code which stands for the command.
+     * 标志命令类型 有负载请求 和心跳请求
      */
     private CommandCode       cmdCode;
     /* command version */

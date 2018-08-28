@@ -18,6 +18,7 @@ package com.alipay.remoting;
 
 /**
  * basic info for biz
+ * 业务上下文
  * 
  * @author xiaomin.cxm
  * @version $Id: BizContext.java, v 0.1 Jan 6, 2016 10:35:04 PM xiaomin.cxm Exp $

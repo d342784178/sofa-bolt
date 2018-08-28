@@ -37,6 +37,7 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.Attribute;
 
 /**
+ * 连接状态日志记录及事件分发
  * Log the channel status event.
  * 
  * @author jiangping
@@ -142,7 +143,9 @@ public class ConnectionEventHandler extends ChannelDuplexHandler {
             // add reconnect task
             if (this.globalSwitch.isOn(GlobalSwitch.CONN_RECONNECT_SWITCH)) {
                 Connection conn = (Connection) attr.get();
+                //重连
                 if (reconnectManager != null) {
+                    //提交重连任务到reconnectManager
                     reconnectManager.addReconnectTask(conn.getUrl());
                 }
             }

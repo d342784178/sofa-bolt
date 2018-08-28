@@ -89,6 +89,7 @@ public abstract class AbstractRemotingProcessor<T extends RemotingCommand> imple
                                                                                     throws Exception {
         ProcessTask task = new ProcessTask(ctx, msg);
         if (this.getExecutor() != null) {
+            // 默认提交到业务线程池中 (不阻塞netty)
             this.getExecutor().execute(task);
         } else {
             defaultExecutor.execute(task);

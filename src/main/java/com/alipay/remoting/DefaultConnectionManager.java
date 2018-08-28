@@ -804,12 +804,14 @@ public class DefaultConnectionManager implements ConnectionManager, ConnectionHe
                 }
                 // initialize executor in lazy way
                 initializeExecutor();
+                //异步建立连接
                 pool.markAsyncCreationStart();// mark the start of async
                 try {
                     this.asyncCreateConnectionExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             try {
+                                // 针对硬件负载情况 建立多个连接
                                 for (int i = pool.size(); i < url.getConnNum(); ++i) {
                                     Connection conn = null;
                                     try {

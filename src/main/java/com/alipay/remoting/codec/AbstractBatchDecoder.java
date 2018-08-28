@@ -30,6 +30,7 @@ import io.netty.util.internal.RecyclableArrayList;
 import io.netty.util.internal.StringUtil;
 
 /**
+ * 批量提交解码器
  * This class mainly hack the {@link io.netty.handler.codec.ByteToMessageDecoder} to provide batch submission capability.
  * This can be used the same way as ByteToMessageDecoder except the case your following inbound handler may get a decoded msg,
  * which actually is an array list, then you can submit the list of msgs to an executor to process. For example
@@ -360,6 +361,7 @@ public abstract class AbstractBatchDecoder extends ChannelInboundHandlerAdapter 
             while (in.isReadable()) {
                 int outSize = out.size();
                 int oldInputLength = in.readableBytes();
+                //解码 每次解码后readIndex减少 buffer内容不变
                 decode(ctx, in, out);
 
                 // Check if this handler was removed before continuing the loop.

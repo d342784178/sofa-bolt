@@ -109,7 +109,7 @@ public abstract class BaseRemoting {
         conn.addInvokeFuture(future);
 
         try {
-            //add timeout
+            //超时控制器
             Timeout timeout = TimerHolder.getTimer().newTimeout(new TimerTask() {
                 @Override
                 public void run(Timeout timeout) throws Exception {
